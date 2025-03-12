@@ -15,3 +15,4 @@ COPY . .
 
 # Command to run your application (modify as needed)
 CMD ["python", "OpenRouterChatApp.py"]
+
