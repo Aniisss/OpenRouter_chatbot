@@ -32,6 +32,10 @@ jobs:
       - name: Run Safety (Dependency Vulnerability Scan)
         run: safety check --full-report
 
+      - name: Build Docker image
+        run: |
+          docker build -t chatbot-app .
+
       - name: Run Hadolint (Dockerfile Best Practices)
         uses: hadolint/hadolint-action@v3.1.0
 
