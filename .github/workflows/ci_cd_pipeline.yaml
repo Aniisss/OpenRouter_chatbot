@@ -96,7 +96,7 @@ jobs:
       - name: Build and Run Docker container
         run: |
           docker build -t chatbot-app .
-          docker run -d -p 8080:8000 --name chatbot-container chatbot-app
+          docker run -d --network=zapnet -p 8080:8000 --name chatbot-container chatbot-app
 
       - name: Check running containers
         run: docker ps -a
@@ -107,7 +107,7 @@ jobs:
       - name: Wait for service to start
         run: |
           for i in {1..30}; do
-           curl -sSf http://localhost:8080 && break
+           curl -sSf http://chatbot-container:8000 && break
            echo "Waiting for service..."
            sleep 5
           done
@@ -115,7 +115,7 @@ jobs:
       - name: Run OWASP ZAP (DAST)
         uses: zaproxy/action-full-scan@v0.9.0
         with:
-          target: "http://localhost:8080"
+          target: "http://chatbot-container:8000"
 
   sbom:
     runs-on: ubuntu-latest
