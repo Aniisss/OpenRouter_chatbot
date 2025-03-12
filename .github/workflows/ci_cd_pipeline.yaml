@@ -35,6 +35,10 @@ jobs:
       - name: Run Hadolint (Dockerfile Best Practices)
         uses: hadolint/hadolint-action@v3.1.0
 
+      - name: Build Docker image
+        run: |
+          docker build -t chatbot-app .
+
       - name: Run Trivy (Docker Security Scan)
         uses: aquasecurity/trivy-action@master
         with:
