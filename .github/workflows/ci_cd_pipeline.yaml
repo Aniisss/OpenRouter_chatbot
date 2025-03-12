@@ -96,6 +96,7 @@ jobs:
       - name: Build and Run Docker container
         run: |
           docker build -t chatbot-app .
+          docker network create zapnet
           docker run -d --network=zapnet -p 8080:8000 --name chatbot-container chatbot-app
 
       - name: Check running containers
