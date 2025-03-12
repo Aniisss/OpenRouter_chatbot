@@ -4,7 +4,10 @@ from collections import deque
 
 OPENROUTER_API_KEY = input("input your openrouter api key (get from https://openrouter.ai/keys )")
 
+
 class OpenRouterChatApp:
+
+    
     def __init__(self):
         self.session = None
         self.selected_model = None
