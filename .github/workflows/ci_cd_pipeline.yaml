@@ -68,12 +68,13 @@ jobs:
         run: |
           wget -O sonarscanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
           unzip sonarscanner.zip
-          export PATH=$PWD/sonar-scanner-5.0.1.3006-linux/bin:$PATH
+          echo "Adding SonarQube Scanner to PATH"
+          echo "$PWD/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
 
       - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "http://your-sonarqube-server:9000"
+          SONAR_HOST_URL: "http://localhost:9000"
         run: |
           sonar-scanner \
             -Dsonar.projectKey=chatbot-app \
