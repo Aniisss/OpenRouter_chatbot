@@ -110,7 +110,7 @@ jobs:
            curl -sSf http://localhost:8080 && break
            echo "Waiting for service..."
            sleep 5
-          one
+          done
 
       - name: Run OWASP ZAP (DAST)
         uses: zaproxy/action-full-scan@v0.9.0
