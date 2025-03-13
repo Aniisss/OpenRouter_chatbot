@@ -135,4 +135,4 @@ jobs:
         run: pip install cyclonedx-bom
 
       - name: Generate SBOM
-        run: cyclonedx-py -o bom.json
+        run: cyclonedx-py requirements -o bom.json
