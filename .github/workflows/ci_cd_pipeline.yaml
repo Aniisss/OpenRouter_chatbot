@@ -126,8 +126,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate SBOM
-        uses: CycloneDX/gh-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          format: json
-          output: "bom.json"
+          python-version: "3.10"
+
+      - name: Install CycloneDX for Python
+        run: pip install cyclonedx-bom
+
+      - name: Generate SBOM
+        run: cyclonedx-py -o bom.json
