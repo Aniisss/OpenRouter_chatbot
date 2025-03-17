@@ -74,7 +74,7 @@ jobs:
       - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://8e45-41-62-22-221.ngrok-free.app"
+          SONAR_HOST_URL: "https://4b7f-197-25-192-221.ngrok-free.app"
         run: |
           sonar-scanner \
             -Dsonar.projectKey=chatbot-app \
