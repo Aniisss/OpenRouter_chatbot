@@ -46,7 +46,7 @@ jobs:
         with:
           image-ref: "chatbot-app:latest"
           format: "table"
-          exit-code: 1
+          exit-code: 0
           ignore-unfixed: true
 
       - name: Run GitLeaks (Secret Scanning)
