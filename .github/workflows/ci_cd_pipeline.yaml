@@ -41,6 +41,8 @@ jobs:
 
       - name: Run Trivy (Docker Security Scan)
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           image-ref: "chatbot-app:latest"
           format: "table"
