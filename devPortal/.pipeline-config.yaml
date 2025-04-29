@@ -1,1 +1,31 @@
-fichier test
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python:3.11  # Official CircleCI Python image
+    steps:
+      - checkout  # Pull your source code
+
+      - setup_remote_docker:  # Enable Docker commands inside the job
+          version: 20.10.14
+
+      - run:
+          name: Build Docker Image
+          command: |
+            # Build your application Docker image
+            # Make sure you have a Dockerfile in your repository
+            docker build -t my-python-app .
+
+      - run:
+          name: Run Unit Tests inside Docker
+          command: |
+            # Run your tests inside the built Docker container
+            # Make sure your container can run tests correctly (e.g., using pytest)
+            docker run --rm my-python-app pytest tests/
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build-and-test
