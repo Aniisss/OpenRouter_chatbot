@@ -1,27 +1,27 @@
-version: 2.1
+name: DevSecOps Build and Test Pipeline
+'on':
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   build-and-test:
-    docker:
-      - image: cimg/python:3.11
+    runs-on: ubuntu-latest
     steps:
-      - checkout
-      - setup_remote_docker:
-          version: 20.10.14
-      - run:
-          name: Build Docker Image
-          command: |
-            # Build your application Docker image
-            # Make sure you have a Dockerfile in your repository
-            docker build -t my-python-app .
-      - run:
-          name: Run Unit Tests inside Docker
-          command: >
-            # Run your tests inside the built Docker container
-
-            # Make sure your container can run tests correctly (e.g., using
-            pytest)
-
-            docker run --rm my-python-app pytest tests/
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        run: |
+          # Edit the image name if needed
+          docker build -t my-app .
+      - name: Run Unit Tests
+        run: |
+          # Edit the test command based on your project
+          docker run --rm my-app pytest tests/
   analyze:
     runs-on: ubuntu-latest
     steps:
@@ -138,16 +138,4 @@ jobs:
         with:
           name: sbom
           path: bom.json
-workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - build-and-test
-name: Full DevSecOps Pipeline (With SonarQube & Security)
-'on':
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+workflows: {}
