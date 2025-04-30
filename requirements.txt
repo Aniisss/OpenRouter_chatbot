@@ -1,3 +1,4 @@
-aiohttp==3.11.13
 fastapi
 uvicorn
+aiohttp
+python-dotenv
