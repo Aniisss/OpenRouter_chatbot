@@ -1,16 +1,28 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 import asyncio
-import aiohttp
 from collections import deque
+import aiohttp
+import os
 
-OPENROUTER_API_KEY = input("input your openrouter api key (get from https://openrouter.ai/keys )")
+# Load the API key from an environment variable
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise RuntimeError("OPENROUTER_API_KEY is not set in environment variables.")
 
+# Request schema
+class ChatRequest(BaseModel):
+    message: str
 
+# Response schema
+class ChatResponse(BaseModel):
+    response: str
+
+# Chat handler class
 class OpenRouterChatApp:
-
-    
     def __init__(self):
         self.session = None
-        self.selected_model = None
+        self.selected_model = "openai/gpt-3.5-turbo"  # Default model
         self.conversation_history = deque(maxlen=30)
         self.semaphore = asyncio.Semaphore(10)
 
@@ -18,7 +30,8 @@ class OpenRouterChatApp:
         self.session = aiohttp.ClientSession()
 
     async def close_session(self):
-        await self.session.close()
+        if self.session:
+            await self.session.close()
 
     async def get_chat_completion(self, user_input):
         async with self.semaphore:
@@ -26,8 +39,8 @@ class OpenRouterChatApp:
             api_url = "https://openrouter.ai/api/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "$YOUR_SITE_URL",
-                "X-Title": "$YOUR_APP_NAME",
+                "HTTP-Referer": "https://yourdomain.com",
+                "X-Title": "OpenRouter FastAPI Chat",
             }
             data = {
                 "model": self.selected_model,
@@ -35,58 +48,32 @@ class OpenRouterChatApp:
             }
 
             async with self.session.post(url=api_url, headers=headers, json=data) as response:
-                response.raise_for_status()
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail=await response.text())
                 api_result = await response.json()
-                return api_result.get("choices")[0].get("message")
+                reply = api_result.get("choices")[0].get("message")
+                return reply.get("content")
 
     def add_to_conversation_history(self, role, content):
-        message = {"role": role, "content": content}
-        self.conversation_history.append(message)
+        self.conversation_history.append({"role": role, "content": content})
 
-    def select_model(self):
-        models = [
-            "meta-llama/llama-3.3-70b-instruct:free", "openai/gpt-3.5-turbo", "neversleep/noromaid-mixtral-8x7b-instruct",
-            "mistralai/mistral-7b-instruct", "nousresearch/nous-capybara-7b", "openchat/openchat-7b",
-            "gryphe/mythomist-7b", "openrouter/cinematika-7b", "rwkv/rwkv-5-world-3b", "recursal/rwkv-5-3b-ai-town"
-        ]
+# FastAPI app setup
+app = FastAPI()
+chat_app = OpenRouterChatApp()
 
-        print("Available Models:")
-        for idx, model in enumerate(models, start=1):
-            model_name = model.split("/")[-1].replace("-", " ").title()
-            print(f"{idx}. {model_name}")
+@app.on_event("startup")
+async def on_startup():
+    await chat_app.init_session()
 
-        while True:
-            try:
-                choice = int(input("Select a model (enter the corresponding number): "))
-                if  1 <= choice <= len(models):
-                    self.selected_model = models[choice -  1]
-                    print(f"Selected Model: {self.selected_model}")
-                    break
-                else:
-                    print("Invalid choice. Please enter a valid number.")
-            except ValueError:
-                print("Invalid input. Please enter a number.")
+@app.on_event("shutdown")
+async def on_shutdown():
+    await chat_app.close_session()
 
-    async def main(self):
-        print("Welcome to the Turbo Chat !")
-        self.select_model()
-        await self.init_session()
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
-        try:
-            while True:
-                user_input = input("You: ")
-                if user_input.lower() in ["exit", "quit"]:
-                    print("Exiting the app. Goodbye!")
-                    break
-
-                print("Processing...")
-                assistant_response = await self.get_chat_completion(user_input)
-                print(f"Assistant: {assistant_response['content']}\n")
-
-        except KeyboardInterrupt:
-            print("\nUser interrupted. Exiting the app. Goodbye!")
-        finally:
-            await self.close_session()
-
-if __name__ == "__main__":
-    asyncio.run(OpenRouterChatApp().main())
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    reply = await chat_app.get_chat_completion(request.message)
+    return ChatResponse(response=reply)
