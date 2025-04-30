@@ -144,4 +144,3 @@ jobs:
         with:
           name: sbom
           path: bom.json
-workflows: {}
