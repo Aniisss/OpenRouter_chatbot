@@ -144,3 +144,5 @@ jobs:
         with:
           name: sbom
           path: bom.json
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
