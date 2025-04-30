@@ -7,7 +7,7 @@ name: OpenRouter_chatbot Pipeline
     branches:
       - master
 env:
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
