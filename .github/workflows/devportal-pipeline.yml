@@ -23,11 +23,9 @@ jobs:
         run: >
           ENV_ARGS=""
 
-
           for key in $ENV_KEYS; do
             ENV_ARGS="$ENV_ARGS --env $key"
           done
-
 
           eval docker run -d -p 8000:8000 $ENV_ARGS --name devportal-test
           devportal-app
@@ -43,6 +41,16 @@ jobs:
       - name: Stop and remove container
         if: always()
         run: docker rm -f devportal-test
+      - name: Run container in background
+        run: >-
+          ENV_ARGS=""
+
+          for key in $ENV_KEYS; do
+            ENV_ARGS="$ENV_ARGS --env $key"
+          done
+
+          eval "docker run -d -p 8000:8000 $ENV_ARGS --name devportal-test
+          devportal-app"
   analyze:
     runs-on: ubuntu-latest
     steps:
