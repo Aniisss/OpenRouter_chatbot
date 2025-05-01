@@ -137,7 +137,7 @@ jobs:
             echo "No requirements.txt found; skipping SBOM"
           fi
       - name: Upload SBOM as Artifact
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v4
         with:
           name: sbom
           path: bom.json
