@@ -7,8 +7,8 @@ on:
     branches:
       - master
 env:
-  ENV_KEYS: OPENROUTER_API_KEY SONAR_TOKEN
-  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  ENV_KEYS: OPENROUTER_KEY_API SONAR_TOKEN
+  OPENROUTER_KEY_API: ${{ secrets.OPENROUTER_KEY_API }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 jobs:
   build-and-run:
