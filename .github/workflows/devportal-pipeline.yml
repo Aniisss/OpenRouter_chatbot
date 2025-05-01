@@ -6,6 +6,9 @@ name: "OpenRouter_chatbot Pipeline"
   pull_request:
     branches:
       - "master"
+env:
+  ENV_KEYS: "OPENROUTER_API_KEY"
+  OPENROUTER_API_KEY: "${{ secrets.OPENROUTER_API_KEY }}"
 jobs:
   build-and-run:
     runs-on: "ubuntu-latest"
@@ -19,7 +22,7 @@ jobs:
       - name: "Run container in background"
         run: "ENV_ARGS=\"\"\nfor key in $ENV_KEYS; do\n  ENV_ARGS=\"$ENV_ARGS --env $key\"\ndone\neval docker run -d -p 8000:8000 $ENV_ARGS --name devportal-test devportal-app\n"
       - name: "Wait for app to become responsive"
-        run: "for i in {1..30}; do\n  curl -sSf http://localhost:8000 && echo \"App is responsive!\" && exit 0\n  echo \"Waiting for app...\"\n  sleep 3\ndone\necho \"App failed to respond after 30 attempts.\" >&2\nexit 1\n"
+        run: "for i in {1..30}; do\n  curl -sSf http://localhost:8000/chat && echo \"App is responsive!\" && exit 0\n  echo \"Waiting for app...\"\n  sleep 3\ndone\necho \"App failed to respond after 30 attempts.\" >&2\nexit 1\n"
       - name: "Stop and remove container"
         if: "always()"
         run: "docker rm -f devportal-test"
