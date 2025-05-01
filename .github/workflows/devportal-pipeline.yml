@@ -20,12 +20,14 @@ jobs:
       - name: Build Docker image
         run: docker build -t devportal-app .
       - name: Run container in background
-        run: |
+        run: >
           ENV_ARGS=""
+
 
           for key in $ENV_KEYS; do
             ENV_ARGS="$ENV_ARGS --env $key"
           done
+
 
           eval docker run -d -p 8000:8000 $ENV_ARGS --name devportal-test
           devportal-app
