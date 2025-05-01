@@ -20,14 +20,14 @@ jobs:
       - name: Build Docker image
         run: docker build -t devportal-app .
       - name: Run container in background
-        run: |-
+        run: |
           ENV_ARGS=""
           for key in $ENV_KEYS; do
             ENV_ARGS="$ENV_ARGS --env $key"
           done
           eval docker run -d -p 8000:8000 $ENV_ARGS --name devportal-test devportal-app
       - name: Wait for app to become responsive
-        run: |-
+        run: |
           for i in {1..30}; do
             curl -sSf http://localhost:8000/health && echo "App is responsive!" && exit 0
             echo "Waiting for app..."
@@ -48,7 +48,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install dependencies
-        run: |-
+        run: |
           python -m pip install --upgrade pip
           pip install bandit safety
       - name: Run Bandit (Security Analysis)
@@ -80,7 +80,7 @@ jobs:
           distribution: temurin
           java-version: "17"
       - name: Install Sonar Scanner
-        run: |-
+        run: |
           wget -O sonarscanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
           unzip sonarscanner.zip
           echo "$PWD/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
@@ -88,7 +88,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarqube.example.com
-        run: |-
+        run: |
           sonar-scanner \
             -Dsonar.projectKey=devportal-app \
             -Dsonar.sources=. \
@@ -103,12 +103,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and Run Docker container
-        run: |-
+        run: |
           docker build -t devportal-app .
           docker network create zapnet || true
           docker run -d --network=zapnet -p 8080:8000 --name devportal-container devportal-app
       - name: Wait for app to become responsive
-        run: |-
+        run: |
           for i in {1..30}; do
             curl -sSf http://devportal-container:8000 && echo "App is responsive!" && exit 0
             echo "Waiting for app..."
@@ -133,7 +133,7 @@ jobs:
       - name: Install CycloneDX for Python
         run: pip install cyclonedx-bom
       - name: Generate SBOM
-        run: |-
+        run: |
           ls -la
           if [ -f requirements.txt ]; then
             cyclonedx-py requirements -o bom.json
