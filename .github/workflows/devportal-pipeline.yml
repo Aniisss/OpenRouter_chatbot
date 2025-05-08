@@ -127,6 +127,18 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN
+      - name: Export SonarQube Issues
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          curl -s -u $SONAR_TOKEN: \
+            "$SONAR_HOST_URL/api/issues/search?componentKeys=devportal-app&ps=500" \
+            -o sonar-report.json
+      - name: Upload SonarQube Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-report
+          path: sonar-report.json
   dast:
     needs: sonar
     runs-on: ubuntu-latest
