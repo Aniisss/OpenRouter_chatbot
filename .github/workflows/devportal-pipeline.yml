@@ -61,7 +61,7 @@ jobs:
           name: bandit-report
           path: bandit-report.json
       - name: Run Safety (Dependency Vulnerability Scan)
-        run: safety check --json > safety-report.json || echo "::warning::Safety failed"
+        run: safety scan --json > safety-report.json || echo "::warning::Safety failed"
         continue-on-error: true
       - name: Upload Safety report
         uses: actions/upload-artifact@v4
@@ -94,7 +94,7 @@ jobs:
       - name: Run GitLeaks (Secret Scanning)
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: "--report-format json --report-path gitleaks-report.json"
+          scan_args: "--report-format json --report-path gitleaks-report.json"
         continue-on-error: true
       - name: Upload GitLeaks report
         uses: actions/upload-artifact@v4
