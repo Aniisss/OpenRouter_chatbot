@@ -60,8 +60,10 @@ jobs:
         with:
           name: bandit-report
           path: bandit-report.json
-      - name: Run Safety (Dependency Vulnerability Scan)
-        run: safety scan --json > safety-report.json || echo "::warning::Safety failed"
+      - name: Run Safety (legacy fallback)
+        run: |
+          safety check --json > raw-safety-output.json || echo "::warning::Safety failed"
+          tail -n +10 raw-safety-output.json > safety-report.json
         continue-on-error: true
       - name: Upload Safety report
         uses: actions/upload-artifact@v4
