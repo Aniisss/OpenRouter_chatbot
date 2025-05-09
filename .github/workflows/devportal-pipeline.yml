@@ -61,12 +61,11 @@ jobs:
           name: bandit-report
           path: bandit-report.json
       - name: Run Safety Scan
-        uses: pyupio/safety-action@v1
-        with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
-          output-format: json
-          args: |
-            --save-json safety-report.json
+        run: |
+          pip install safety
+          safety scan --output json >safety-report.json
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
       - name: Upload Safety report
         uses: actions/upload-artifact@v4
         with:
@@ -105,3 +104,89 @@ jobs:
         with:
           name: gitleaks-report
           path: gitleaks-report.json
+  sonar:
+    needs: analyze
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Java (Required for SonarQube)
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install Sonar Scanner
+        run: |
+          wget -O sonarscanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonarscanner.zip
+          echo "$PWD/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
+      - name: Run SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://128.85.67.138:9000
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=devportal-app \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_TOKEN
+      - name: Download SonarQube Issues Report
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://128.85.67.138:9000
+        run: |
+          curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/issues/search?componentKeys=devportal-app&ps=500" -o sonar-report.json
+      - name: Upload SonarQube Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-report
+          path: sonar-report.json
+  dast:
+    needs: sonar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and Run Docker container
+        run: |
+          docker build -t devportal-app .
+          docker network create zapnet || true
+          docker run -d --network=zapnet -p 8080:8000 --name devportal-container devportal-app
+      - name: Run OWASP ZAP (DAST)
+        uses: zaproxy/action-full-scan@v0.9.0
+        with:
+          target: http://devportal-container:8000
+          report-format: html
+          output-path: zap-report.html
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-report.html
+  sbom:
+    needs: dast
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install CycloneDX for Python
+        run: pip install cyclonedx-bom
+      - name: Generate SBOM
+        run: |
+          ls -la
+          if [ -f requirements.txt ]; then
+            cyclonedx-py requirements -o bom.json
+          else
+            echo "No requirements.txt found; skipping SBOM"
+          fi
+      - name: Upload SBOM as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: bom.json
