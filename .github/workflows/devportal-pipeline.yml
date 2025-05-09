@@ -67,7 +67,7 @@ jobs:
             echo "::warning::SAFETY_API_KEY is not set. Skipping Safety scan."
             echo '{}' > safety-report.json
           else
-            safety scan --output json --key "$SAFETY_API_KEY" > safety-report.json
+            safety check --output json --key "$SAFETY_API_KEY" > safety-report.json
           fi
         env:
           SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
