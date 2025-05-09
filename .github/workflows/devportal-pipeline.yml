@@ -7,8 +7,7 @@ on:
     branches:
       - master
 env:
-  ENV_KEYS: OPENROUTER_API_KEY SONAR_TOKEN
-  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  ENV_KEYS: SONAR_TOKEN
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 jobs:
   build-and-run:
@@ -63,7 +62,7 @@ jobs:
       - name: Run Safety Scan
         run: |
           pip install safety
-          safety check --key secrets.SAFETY_API_KEY --output json > safety-report.json
+          safety check --key $SAFETY_API_KEY --output json > safety-report.json
       - name: Upload Safety report
         uses: actions/upload-artifact@v4
         with:
