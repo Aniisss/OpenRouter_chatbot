@@ -87,10 +87,14 @@ jobs:
         with:
           name: trivy-report
           path: trivy-report.json
+      - name: Install GitLeaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
+          chmod +x gitleaks
+          sudo mv gitleaks /usr/local/bin
       - name: Run GitLeaks (Secret Scanning)
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          scan_args: "--report-format json --report-path gitleaks-report.json"
+        run: |
+          gitleaks detect --report-format json --report-path gitleaks-report.json --redact
         continue-on-error: true
       - name: Upload GitLeaks report
         uses: actions/upload-artifact@v4
