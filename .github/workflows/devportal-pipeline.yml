@@ -61,10 +61,10 @@ jobs:
           name: bandit-report
           path: bandit-report.json
       - name: Run Safety (Modern Scan)
-        uses: pyupio/safety-action@v1
-        with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
-          args: scan --output json > safety-report.json
+        run: |
+          pip install safety
+          safety auth --key ${{ secrets.SAFETY_API_KEY }}
+          safety scan --output json > safety-report.json
       - name: Upload Safety report
         uses: actions/upload-artifact@v4
         with:
