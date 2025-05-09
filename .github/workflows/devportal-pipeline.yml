@@ -30,7 +30,7 @@ jobs:
       - name: Wait for app to become responsive
         run: |
           for i in {1..30}; do
-            curl -sSf http://localhost:8000/health && echo "App is responsive!" && exit 0
+            curl -sSf http://localhost:800/health && echo "App is responsive!" && exit 0
             echo "Waiting for app..."
             sleep 3
           done
@@ -60,11 +60,12 @@ jobs:
         with:
           name: bandit-report
           path: bandit-report.json
-      - name: Run Safety (Modern Scan)
-        uses: pyupio/safety-action@v1
-        with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
-          args: scan --output json > safety-report.json
+      - name: Run Safety Scan
+        run: |
+          pip install safety
+          safety scan --output json > safety-report.json
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
       - name: Upload Safety report
         uses: actions/upload-artifact@v4
         with:
